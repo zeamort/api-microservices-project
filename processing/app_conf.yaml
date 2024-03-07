@@ -1,0 +1,9 @@
+version: 1
+datastore:
+  filename: stats.sqlite
+scheduler:
+  period_sec: 5
+power-usage:
+  url: http://localhost:8090/readings/power-usage
+location:
+  url: http://localhost:8090/readings/location

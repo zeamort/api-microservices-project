@@ -1,0 +1,66 @@
+---
+openapi: 3.0.0
+info:
+  title: Usage and Location Statistics Processor API
+  description: This API processes stored power usage and location events from electric generator devices
+  contact:
+    email: zeamort@gmail.com
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- name: devices
+  description: Operations available to Electric Generator devices
+paths:
+  /stats:
+    get:
+      summary: retrieves event statistics
+      description: Retrieves Power Usage and Location statistics from the system
+      operationId: app.get_stats
+      responses:
+        "200":
+          description: Successfully returned a list of events
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/ReadingStats'
+        "400":
+          description: "invalid request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+components:
+  schemas:
+    ReadingStats:
+      required:
+      - total_power_usage_events
+      - max_power_usage
+      - max_temperature_C
+      - average_state_of_charge
+      - total_location_events
+      properties:
+        total_power_usage_events:
+          type: integer
+          example: 50000
+        max_power_usage:
+          type: number
+          format: float
+          example: 5190.2
+        max_temperature_C:
+          type: number
+          format: float
+          example: 45.2
+        average_state_of_charge:
+          type: number
+          format: float
+          example: 67.2
+        total_location_events:
+          type: integer
+          example: 50000
+      type: object
