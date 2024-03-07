@@ -1,0 +1,194 @@
+---
+openapi: 3.0.0
+info:
+  title: Usage and Location API
+  description: This API provides audit info
+  contact:
+    email: zeamort@gmail.com
+  version: 1.0.0
+
+paths:
+  /readings/power-usage:
+    get:
+      summary: gets a power usage reading from history
+      operationId: app.get_power_usage_reading
+      description: Gets power usage readings from the event store
+      parameters:
+        - name: index
+          in: query
+          description: Gets the PU at the index in the event store
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: Successfully returned a power usage event
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/PowerUsageReading'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  message: 
+                    type: string
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  message: 
+                    type: string
+
+  /readings/location:
+    get:
+      summary: gets a location reading from history
+      operationId: app.get_location_reading
+      description: Gets location reading from the event store
+      parameters:
+        - name: index
+          in: query
+          description: Gets the location reading at the index in the event store
+          schema:
+            type: integer
+            example: 100
+      responses:
+        '200':
+          description: Successfully returned a location event
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/LocationReading'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  message: 
+                    type: string
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  message: 
+                    type: string
+
+components:
+  schemas:
+    PowerUsageReading:
+      required:
+      - device_id
+      - device_type
+      - power_data
+      - timestamp
+      - trace_id
+      type: object
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        device_type:
+          type: string
+          example: 30k
+        power_data:
+          $ref: '#/components/schemas/PowerData'
+        timestamp:
+          type: string
+          format: date-time
+          example: 2024-01-04T09:12:33.001Z
+        trace_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0852
+
+    LocationReading:
+      required:
+      - device_id
+      - device_type
+      - location_data
+      - timestamp
+      - trace_id
+      type: object
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        device_type:
+          type: string
+          example: 30k
+        location_data:
+          $ref: '#/components/schemas/LocationData'
+        timestamp:
+          type: string
+          format: date-time
+          example: 2024-01-04T09:12:33.001Z
+        trace_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0853
+
+    PowerData:
+      required:
+      - energy_out_Wh
+      - power_W
+      - state_of_charge_%
+      - temperature_C
+      type: object
+      properties:
+        power_W:
+          minimum: 0
+          type: number
+          format: float
+          example: 1100.5
+        energy_out_Wh:
+          type: number
+          format: float
+          example: 412.6
+        state_of_charge_%:
+          maximum: 100
+          minimum: 0
+          type: number
+          format: integer
+          example: 77
+        temperature_C:
+          type: number
+          format: float
+          example: 34.2
+          
+    LocationData:
+      required:
+      - gps_latitude
+      - gps_longitude
+      type: object
+      properties:
+        gps_latitude:
+          maximum: 90
+          minimum: -90
+          type: number
+          description: The latitude of the location in decimal degrees.
+          format: double
+          example: 49.253581
+        gps_longitude:
+          maximum: 180
+          minimum: -180
+          type: number
+          description: The longitude of the location in decimal degrees.
+          format: double
+          example: -123.001242

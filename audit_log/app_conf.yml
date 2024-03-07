@@ -1,0 +1,11 @@
+version: 1
+datastore:
+  user: 
+  password: 
+  hostname: ec2-52-40-150-21.us-west-2.compute.amazonaws.com
+  port: 3306
+  db: events
+events:
+  hostname: ec2-52-40-150-21.us-west-2.compute.amazonaws.com
+  port: 9092
+  topic: events
