@@ -1,0 +1,9 @@
+version: 1
+report_power_usage_reading:
+  url: http://localhost:8090/readings/power-usage
+report_location_reading:
+  url: http://localhost:8090/readings/location
+events:
+  hostname: ec2-52-40-150-21.us-west-2.compute.amazonaws.com
+  port: 9092
+  topic: events
