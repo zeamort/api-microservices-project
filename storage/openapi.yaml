@@ -1,0 +1,229 @@
+---
+openapi: 3.0.0
+info:
+  title: Usage and Location API
+  description: This API receives power usage and location events from electric generator devices
+  contact:
+    email: zeamort@gmail.com
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- name: devices
+  description: Operations available to Electric Generator devices
+paths:
+  /readings/power-usage:
+    post:
+      tags:
+      - devices
+      summary: reports a device power usage reading
+      description: Adds a new power usage reading to the system
+      operationId: app.report_power_usage_reading # maps to the app.py code
+      requestBody:
+        description: Reading power usage item to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PowerUsageReading'
+      responses:
+        "201":
+          description: item created
+        "400":
+          description: "invalid input, object invalid"
+    get:
+      tags:
+      - devices
+      summary: retrieves power usage readings
+      description: Retrieves power usage readings from the system
+      operationId: app.retrieve_power_usage_readings
+      parameters:
+      - name: start_timestamp
+        in: query
+        description: The start timestamp to filter the readings
+        schema:
+          type: string
+          format: date-time
+          example: 2024-01-04T09:12:33.001Z
+      - name: end_timestamp
+        in: query
+        description: The end timestamp to filter the readings
+        schema:
+          type: string
+          format: date-time
+          example: 2024-01-04T10:12:33.001Z
+      responses:
+        "200":
+          description: successful retrieval of power_usage readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerUsageReading'
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /readings/location:
+    post:
+      tags:
+      - devices
+      summary: reports a device location reading
+      description: Adds a new location reading to the system
+      operationId: app.report_location_reading
+      requestBody:
+        description: Reading location item to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationReading'
+      responses:
+        "201":
+          description: item created
+        "400":
+          description: "invalid input, object invalid"
+    get:
+      tags:
+      - devices
+      summary: retrieves location readings
+      description: Retrieves location readings from the system
+      operationId: app.retrieve_location_readings
+      parameters:
+      - name: start_timestamp
+        in: query
+        description: The start timestamp to filter the readings
+        schema:
+          type: string
+          format: date-time
+          example: 2024-01-04T09:12:33
+      - name: end_timestamp
+        in: query
+        description: The end timestamp to filter the readings
+        schema:
+          type: string
+          format: date-time
+          example: 2024-01-04T10:12:33
+      responses:
+        "200":
+          description: successful retrieval of location readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LocationReading'
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+components:
+  schemas:
+    PowerUsageReading:
+      required:
+      - device_id
+      - device_type
+      - power_data
+      - timestamp
+      - trace_id
+      type: object
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        device_type:
+          type: string
+          example: 30k
+        power_data:
+          $ref: '#/components/schemas/PowerData'
+        timestamp:
+          type: string
+          format: date-time
+          example: 2024-01-04T09:12:33.001Z
+        trace_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0852
+    LocationReading:
+      required:
+      - device_id
+      - device_type
+      - location_data
+      - timestamp
+      - trace_id
+      type: object
+      properties:
+        device_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        device_type:
+          type: string
+          example: 30k
+        location_data:
+          $ref: '#/components/schemas/LocationData'
+        timestamp:
+          type: string
+          format: date-time
+          example: 2024-01-04T09:12:33.001Z
+        trace_id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0853
+    PowerData:
+      required:
+      - energy_out_Wh
+      - power_W
+      - state_of_charge_%
+      - temperature_C
+      type: object
+      properties:
+        power_W:
+          minimum: 0
+          type: number
+          format: float
+          example: 1100.5
+        energy_out_Wh:
+          type: number
+          format: float
+          example: 412.6
+        state_of_charge_%:
+          maximum: 100
+          minimum: 0
+          type: number
+          format: integer
+          example: 77
+        temperature_C:
+          type: number
+          format: float
+          example: 34.2
+    LocationData:
+      required:
+      - gps_latitude
+      - gps_longitude
+      type: object
+      properties:
+        gps_latitude:
+          maximum: 90
+          minimum: -90
+          type: number
+          description: The latitude of the location in decimal degrees.
+          format: double
+          example: 49.253581
+        gps_longitude:
+          maximum: 180
+          minimum: -180
+          type: number
+          description: The longitude of the location in decimal degrees.
+          format: double
+          example: -123.001242
