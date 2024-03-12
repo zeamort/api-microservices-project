@@ -40,8 +40,6 @@ DB_ENGINE = create_engine(f"mysql+pymysql://"
                           f"{app_config['datastore']['port']}/"
                           f"{app_config['datastore']['db']}")
 
-with DB_ENGINE.connect() as connection:
-    connection.execute(text("SET time_zone = 'America/Los_Angeles';"))
 
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
