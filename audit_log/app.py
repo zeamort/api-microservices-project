@@ -7,6 +7,8 @@ import json
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
 from threading import Thread
+from connexion.middleware import MiddlewarePosition
+from starlette.middleware.cors import CORSMiddleware
 
 # Load the application configuration
 with open('app_conf.yml', 'r') as f:
@@ -58,6 +60,14 @@ def get_event_reading_by_type(index, event_type):
 def main():
     app = connexion.FlaskApp(__name__, specification_dir='')
     app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
+    app.add_middleware(
+        CORSMiddleware,
+        position=MiddlewarePosition.BEFORE_EXCEPTION,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.run(host='0.0.0.0', port=8110)
 
 if __name__ == "__main__":
