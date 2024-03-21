@@ -43,7 +43,7 @@ export default function AppStats() {
 							<td># LO: {stats['total_location_events']}</td>
 						</tr>
 						<tr>
-							<td colspan="2">Max Power Usage: {stats['max_power_usage']}</td>
+							<td colspan="2">Max Power Usage: {stats['max_power_W']}</td>
 						</tr>
 						<tr>
 							<td colspan="2">Max Temperature C: {stats['max_temperature_C']}</td>
