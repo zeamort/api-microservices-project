@@ -16,7 +16,9 @@ import logging.config
 import json
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
-from threading import Thread
+from threading import 
+
+import time
 
 # Load the app_conf.yml configuration 
 with open('app_conf.yml', 'r') as f:
@@ -145,8 +147,23 @@ def retrieve_location_readings(start_timestamp, end_timestamp):
 def process_messages():
     """ Process event messages """
     hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
-    client = KafkaClient(hosts=hostname)
-    topic = client.topics[str.encode(app_config["events"]["topic"])]
+
+    retry_count = 0
+
+    while (retry_count < app_config['max_retries']):
+        logger.info("Attempting to connect to Kafka. Attempt #: %s", retry_count + 1)
+        try:
+            client = KafkaClient(hosts=hostname)
+            topic = client.topics[str.encode(app_config["events"]["topic"])]
+            logger.info("Successfully connected to Kafka on attempt #: %s", retry_count + 1)
+            break
+        except Exception as e:
+            logger.error("Failed to connect to Kafka on attempt #:%s, error: %s", retry_count + 1, e)
+            time.sleep(app_config['sleep_time'])
+            retry_count += 1
+    else:
+        logger.error("Exceeded maximum number of retries (%s) for Kafka connection", app_config['max_retries'])
+            
 
     # Create a consume on a consumer group, that only reads new messages
     # (uncommitted messages) when the service re-starts (i.e., it doesn't read all the old messages from the history in the message queue).

@@ -9,3 +9,5 @@ events:
   hostname: ec2-52-40-150-21.us-west-2.compute.amazonaws.com
   port: 9092
   topic: events
+max_retries: 10
+sleep_time: 10
