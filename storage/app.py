@@ -41,7 +41,7 @@ DB_ENGINE = create_engine(f"mysql+pymysql://"
                           f"{app_config['datastore']['hostname']}:"
                           f"{app_config['datastore']['port']}/"
                           f"{app_config['datastore']['db']}",
-                          pool_size=app_config['pool_zie'],
+                          pool_size=app_config['pool_size'],
                           pool_recycle=app_config['pool_recycle'],
                           pool_pre_ping=app_config['pool_pre_ping'])
 
