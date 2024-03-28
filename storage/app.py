@@ -16,7 +16,7 @@ import logging.config
 import json
 from pykafka import KafkaClient
 from pykafka.common import OffsetType
-from threading import 
+from threading import Thread
 
 import time
 
