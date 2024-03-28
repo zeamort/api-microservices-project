@@ -11,3 +11,6 @@ events:
   topic: events
 max_retries: 10
 sleep_time: 10
+pool_size: 20
+pool_recycle: 3600
+pool_pre_ping: True
