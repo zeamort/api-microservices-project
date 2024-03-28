@@ -8,6 +8,7 @@ import logging
 import logging.config
 import uuid
 from pykafka import KafkaClient
+import time
 
 MAX_EVENTS = 5
 EVENT_FILE = "events.json"
@@ -24,11 +25,22 @@ with open('log_conf.yml', 'r') as f:
 # Create a logger for this file
 logger = logging.getLogger('basicLogger')
 
-
+retry_count = 0
 # Initialize KafkaClient with your Kafka server details
-client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
-topic = client.topics[str.encode(app_config['events']['topic'])]
-producer = topic.get_sync_producer()
+while (retry_count < app_config['max_retries']):
+    logger.info("Attempting to connect to Kafka. Attempt #: %s", retry_count + 1)
+    try:
+        client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
+        topic = client.topics[str.encode(app_config['events']['topic'])]
+        producer = topic.get_sync_producer()
+        logger.info("Successfully connected to Kafka on attempt #: %s", retry_count + 1)
+        break
+    except Exception as e:
+        logger.error("Failed to connect to Kafka on attempt #:%s, error: %s", retry_count + 1, e)
+        time.sleep(app_config['sleep_time'])
+        retry_count += 1
+else:
+    logger.error("Exceeded maximum number of retries (%s) for Kafka connection", app_config['max_retries'])
     
 
 #  Your functions here
