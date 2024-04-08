@@ -14,18 +14,31 @@ import numpy as np
 import copy
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
+import os
 
-# Load the app_conf.yaml configuration 
-with open('app_conf.yaml', 'r') as f:
+if "TARGET_ENV" in os.environ and os.environ["TARGET_ENV"] == "test":
+    print("In Test Environment")
+    app_conf_file = "/config/app_conf.yaml"
+    log_conf_file = "/config/log_conf.yaml"
+else:
+    print("In Dev Environment")
+    app_conf_file = "app_conf.yaml"
+    log_conf_file = "log_conf.yaml"
+
+# Load the app_conf.yml configuration 
+with open(app_conf_file, 'r') as f:
     app_config = yaml.safe_load(f.read())
 
 # Load the log_conf.yml configuration 
-with open('log_conf.yaml', 'r') as f:
+with open(log_conf_file, 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
 
 # Create a logger for this file
 logger = logging.getLogger('basicLogger')
+
+logger.info("App Conf File: %s" % app_conf_file)
+logger.info("Log Conf File: %s" % log_conf_file)
 
 # Create the database connection
 DB_ENGINE = create_engine(f"sqlite:///{app_config['datastore']['filename']}")
