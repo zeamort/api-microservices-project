@@ -42,6 +42,7 @@ logger.info("Log Conf File: %s" % log_conf_file)
 
 # Create the database connection
 DB_ENGINE = create_engine(f"sqlite:///{app_config['datastore']['filename']}")
+Base.metadata.create_all(DB_ENGINE)
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
