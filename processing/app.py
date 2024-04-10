@@ -56,8 +56,9 @@ DB_SESSION = sessionmaker(bind=DB_ENGINE)
 client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
 
 def publish_event_to_event_log(client, code, message):
-    event_log_topic = app_config['events']['startup_topic']
+    event_log_topic = client.topics[str.encode(app_config['events']['startup_topic'])]
     event_log_producer = event_log_topic.get_sync_producer()
+
     
     event_msg = {
         "type": "processor_event",
