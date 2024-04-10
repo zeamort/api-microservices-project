@@ -67,7 +67,7 @@ def publish_startup_event(client):
 
     startup_msg = {
         "type": "storage_startup",
-        "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "payload": {
             "code": "0002",
             "message": "Storage is ready to receive messages on its RESTful API."
