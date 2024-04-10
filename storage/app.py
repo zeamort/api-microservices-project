@@ -176,27 +176,6 @@ def retrieve_location_readings(start_timestamp, end_timestamp):
 
 
 def process_messages():
-    """ Process event messages """
-    hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
-
-    retry_count = 0
-
-    while (retry_count < app_config['max_retries']):
-        logger.info("Attempting to connect to Kafka. Attempt #: %s", retry_count + 1)
-        try:
-            client = KafkaClient(hosts=hostname)
-            publish_startup_event(client)
-            topic = client.topics[str.encode(app_config["events"]["topic"])]
-            logger.info("Successfully connected to Kafka on attempt #: %s", retry_count + 1)
-            break
-        except Exception as e:
-            logger.error("Failed to connect to Kafka on attempt #:%s, error: %s", retry_count + 1, e)
-            time.sleep(app_config['sleep_time'])
-            retry_count += 1
-    else:
-        logger.error("Exceeded maximum number of retries (%s) for Kafka connection", app_config['max_retries'])
-            
-
     # Create a consume on a consumer group, that only reads new messages
     # (uncommitted messages) when the service re-starts (i.e., it doesn't read all the old messages from the history in the message queue).
     consumer = topic.get_simple_consumer(consumer_group=b'event_group', reset_offset_on_start=False, auto_offset_reset=OffsetType.LATEST)
@@ -224,6 +203,26 @@ app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api("openapi.yaml", base_path="/storage", strict_validation=True, validate_responses=True)
 
 if __name__ == "__main__":
+    """ Process event messages """
+    hostname = "%s:%d" % (app_config["events"]["hostname"], app_config["events"]["port"])
+
+    retry_count = 0
+
+    while (retry_count < app_config['max_retries']):
+        logger.info("Attempting to connect to Kafka. Attempt #: %s", retry_count + 1)
+        try:
+            client = KafkaClient(hosts=hostname)
+            topic = client.topics[str.encode(app_config["events"]["topic"])]
+            logger.info("Successfully connected to Kafka on attempt #: %s", retry_count + 1)
+            publish_startup_event(client)
+            break
+        except Exception as e:
+            logger.error("Failed to connect to Kafka on attempt #:%s, error: %s", retry_count + 1, e)
+            time.sleep(app_config['sleep_time'])
+            retry_count += 1
+    else:
+        logger.error("Exceeded maximum number of retries (%s) for Kafka connection", app_config['max_retries'])
+
     t1 = Thread(target=process_messages)
     t1.setDaemon(True)
     t1.start()
