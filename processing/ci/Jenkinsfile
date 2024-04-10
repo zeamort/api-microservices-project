@@ -1,4 +1,4 @@
 @Library('shared-lib-morteza@main') _
 
 
-python_build('processing', 'processing', 8100, 'processing')
+python_build('processing', 'processing')

@@ -1,4 +1,4 @@
 @Library('shared-lib-morteza@main') _
 
 
-python_build('storage', 'storage', 8090, 'storage')
+python_build('storage', 'storage')
