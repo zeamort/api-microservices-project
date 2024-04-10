@@ -15,6 +15,9 @@ import copy
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
 import os
+import json
+from pykafka import KafkaClient
+
 
 if "TARGET_ENV" not in os.environ or os.environ["TARGET_ENV"] != "test":
     CORS(app.app)
@@ -51,6 +54,23 @@ Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
 
+def publish_event_to_event_log(code, message):
+    event_log_topic = app_config['events']['startup_topic']
+    event_log_producer = event_log_topic.get_sync_producer()
+    
+    event_msg = {
+        "type": "processor_event",
+        "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "payload": {
+            "code": code,
+            "message": message
+        }
+    }
+    
+    event_log_producer.produce(json.dumps(event_msg).encode('utf-8'))
+    logger.info(f"Published message to Kafka topic '{event_log_topic}' with code {code}")
+
+
 def get_stats():
     # get the latest row of stats from the database and return it as a dictionary
     session = DB_SESSION()
@@ -70,6 +90,7 @@ def populate_stats():
     """ Periodically update stats """
     # 1. Log an INFO message indicating periodic processing has started
     logger.info("Start Periodic Processing")
+    messages_processed = 0
 
     # 2. Read in the current statistics from the SQLite database (filename defined in your configuration)
     try:
@@ -101,6 +122,9 @@ def populate_stats():
         logger.error("Failed to get events from Data Store Service")
         return NoContent, 404
 
+    messages_processed += len(new_power_usage_events) + len(new_location_events)
+    if messages_processed > app_config.get('message_processing_threshold', app_config['message_threshold']):
+        publish_event_to_event_log("0004", f"Processed more than {app_config['message_threshold']} messages.")
 
     # 5. Based on the new events from the Data Store Service:
     
@@ -178,6 +202,7 @@ app.add_middleware(
 )
 
 if __name__ == "__main__":
+    publish_event_to_event_log("0003", "Processor successfully started.")
     init_scheduler()
     app.run(host='0.0.0.0', port=8100)
 

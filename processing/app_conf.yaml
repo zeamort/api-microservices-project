@@ -7,3 +7,10 @@ power-usage:
   url: http://localhost:8090/readings/power-usage
 location:
   url: http://localhost:8090/readings/location
+events:
+  hostname: ec2-52-40-150-21.us-west-2.compute.amazonaws.com
+  port: 9092
+  startup_topic: event_log 
+max_retries: 10
+sleep_time: 10
+message_threshold: 25
