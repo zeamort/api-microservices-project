@@ -17,6 +17,7 @@ from starlette.middleware.cors import CORSMiddleware
 import os
 import json
 from pykafka import KafkaClient
+import time
 
 
 if "TARGET_ENV" not in os.environ or os.environ["TARGET_ENV"] != "test":
@@ -53,7 +54,6 @@ Base.metadata.create_all(DB_ENGINE)
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
-client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
 
 def publish_event_to_event_log(client, code, message):
     event_log_topic = client.topics[str.encode(app_config['events']['startup_topic'])]
@@ -204,7 +204,22 @@ app.add_middleware(
 )
 
 if __name__ == "__main__":
+    retry_count = 0
+    # Initialize KafkaClient with your Kafka server details
+    while (retry_count < app_config['max_retries']):
+        logger.info("Attempting to connect to Kafka. Attempt #: %s", retry_count + 1)
+        try:
+            client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
+            break
+        except Exception as e:
+            logger.error("Failed to connect to Kafka on attempt #:%s, error: %s", retry_count + 1, e)
+            time.sleep(app_config['sleep_time'])
+            retry_count += 1
+    else:
+        logger.error("Exceeded maximum number of retries (%s) for Kafka connection", app_config['max_retries'])
+
     publish_event_to_event_log(client, "0003", "Processor successfully started.")
+
     init_scheduler()
     app.run(host='0.0.0.0', port=8100)
 
