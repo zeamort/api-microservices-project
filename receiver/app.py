@@ -38,6 +38,26 @@ logger = logging.getLogger('basicLogger')
 logger.info("App Conf File: %s" % app_conf_file)
 logger.info("Log Conf File: %s" % log_conf_file)
 
+
+def publish_startup_event(client):
+    """Publish a startup message to the 'event_log' topic"""
+    event_log_topic = client.topics[str.encode(app_config['events']['startup_topic'])]
+    
+    event_log_producer = event_log_topic.get_sync_producer()
+
+    startup_msg = {
+        "type": "receiver_startup",
+        "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "payload": {
+            "code": "0001",
+            "message": "Receiver is ready to receive messages on its RESTful API."
+        }
+    }
+    
+    event_log_producer.produce(json.dumps(startup_msg).encode('utf-8'))
+    logger.info("Published startup message to Kafka topic 'event_log'")
+
+
 retry_count = 0
 # Initialize KafkaClient with your Kafka server details
 while (retry_count < app_config['max_retries']):
@@ -47,6 +67,7 @@ while (retry_count < app_config['max_retries']):
         topic = client.topics[str.encode(app_config['events']['topic'])]
         producer = topic.get_sync_producer()
         logger.info("Successfully connected to Kafka on attempt #: %s", retry_count + 1)
+        publish_startup_event(client)
         break
     except Exception as e:
         logger.error("Failed to connect to Kafka on attempt #:%s, error: %s", retry_count + 1, e)
