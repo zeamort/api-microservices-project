@@ -59,6 +59,25 @@ Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
 
+def publish_startup_event(client):
+    """Publish a startup message to the 'event_log' topic"""
+    event_log_topic = client.topics[str.encode(app_config['events']['startup_topic'])]
+    
+    event_log_producer = event_log_topic.get_sync_producer()
+
+    startup_msg = {
+        "type": "storage_startup",
+        "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "payload": {
+            "code": "0002",
+            "message": "Storage is ready to receive messages on its RESTful API."
+        }
+    }
+    
+    event_log_producer.produce(json.dumps(startup_msg).encode('utf-8'))
+    logger.info("Published startup message to Kafka topic 'event_log'")
+
+
 def report_power_usage_reading(body):
     """ Receives a power usage reading """
 
@@ -166,6 +185,7 @@ def process_messages():
         logger.info("Attempting to connect to Kafka. Attempt #: %s", retry_count + 1)
         try:
             client = KafkaClient(hosts=hostname)
+            publish_startup_event(client)
             topic = client.topics[str.encode(app_config["events"]["topic"])]
             logger.info("Successfully connected to Kafka on attempt #: %s", retry_count + 1)
             break
