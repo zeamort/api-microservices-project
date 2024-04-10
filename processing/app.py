@@ -53,8 +53,9 @@ Base.metadata.create_all(DB_ENGINE)
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
+client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
 
-def publish_event_to_event_log(code, message):
+def publish_event_to_event_log(client, code, message):
     event_log_topic = app_config['events']['startup_topic']
     event_log_producer = event_log_topic.get_sync_producer()
     
@@ -124,7 +125,7 @@ def populate_stats():
 
     messages_processed += len(new_power_usage_events) + len(new_location_events)
     if messages_processed > app_config.get('message_processing_threshold', app_config['message_threshold']):
-        publish_event_to_event_log("0004", f"Processed more than {app_config['message_threshold']} messages.")
+        publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.")
 
     # 5. Based on the new events from the Data Store Service:
     
@@ -202,7 +203,7 @@ app.add_middleware(
 )
 
 if __name__ == "__main__":
-    publish_event_to_event_log("0003", "Processor successfully started.")
+    publish_event_to_event_log(client, "0003", "Processor successfully started.")
     init_scheduler()
     app.run(host='0.0.0.0', port=8100)
 
