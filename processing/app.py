@@ -105,6 +105,7 @@ def populate_stats():
 
     # 2.1. If no stats yet exist, use default values for the stats
     if stats is None:
+        logger.info("Stats table empty, adding default row now.")
         stats = Statistics(datetime.datetime.now(), 0, 0, 0, 0, 0)
     
     # 3. Get the current datetime
