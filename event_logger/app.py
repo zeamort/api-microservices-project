@@ -116,7 +116,7 @@ if __name__ == "__main__":
     while (retry_count < app_config['max_retries']):
         logger.info("Attempting to connect to Kafka. Attempt #: %s", retry_count + 1)
         try:
-            client = KafkaClient(hosts=f"{app_config["events"]["hostname"]}:{app_config["events"]["port"]}")
+            client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
             topic = client.topics[str.encode(app_config["events"]["topic"])]
             logger.info("Successfully connected to Kafka on attempt #: %s", retry_count + 1)
             break
