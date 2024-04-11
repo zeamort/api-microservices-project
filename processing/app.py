@@ -92,7 +92,7 @@ def populate_stats():
     """ Periodically update stats """
     # 1. Log an INFO message indicating periodic processing has started
     logger.info("Start Periodic Processing")
-    logger.info("ASSIGNMENT3")
+    logger.info("ASSIGNMENT2+1 Electric Boogaloo")
     
     # 2. Read in the current statistics from the SQLite database (filename defined in your configuration)
     try:
