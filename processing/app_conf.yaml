@@ -4,9 +4,9 @@ datastore:
 scheduler:
   period_sec: 5
 power-usage:
-  url: ec2-52-40-150-21.us-west-2.compute.amazonaws.com/storage/readings/power-usage
+  url: http://ec2-52-40-150-21.us-west-2.compute.amazonaws.com/storage/readings/power-usage
 location:
-  url: ec2-52-40-150-21.us-west-2.compute.amazonaws.com/storage/readings/location
+  url: http://ec2-52-40-150-21.us-west-2.compute.amazonaws.com/storage/readings/location
 events:
   hostname: ec2-52-40-150-21.us-west-2.compute.amazonaws.com
   port: 9092
