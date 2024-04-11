@@ -127,16 +127,33 @@ services:
       - "processing"
       - "audit_log"
       - "dashboard"
+      - "event_logger"
     # Connects the port 80 of the nginx container to localhost:80 or localhost
     ports:
       - "80:80"
     networks:
       - "api.network"
+  event_logger:
+    image: event_logger
+    restart: always
+    ports:
+      - "8120"
+    networks:
+      - "api.network"
+    environment:
+      - TARGET_ENV=test
+    volumes:
+      - /home/ubuntu/config/event_logger:/config
+      - /home/ubuntu/logs:/logs
+      - event-logger-db:/data
+    depends_on:
+      - "kafka"
 
 # Names our volume
 volumes:
   my-db:
   processing-db:
+  event-logger-db:
 networks:
   api.network:
 
