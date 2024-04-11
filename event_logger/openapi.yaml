@@ -1,0 +1,62 @@
+---
+openapi: 3.0.0
+info:
+  title: Event Logger Stats API
+  description: This API retrieves the count for event stats topics
+  contact:
+    email: zeamort@gmail.com
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- name: devices
+  description: Operations available to Electric Generator devices
+paths:
+  /event_stats:
+    get:
+      summary: retrieves event statistics
+      description: Retrieves number of events of each code from the system
+      operationId: app.event_stats
+      responses:
+        "200":
+          description: Successfully returned events and their counts
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/EventStats'
+        "400":
+          description: "invalid request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+components:
+  schemas:
+    EventStats:
+      required:
+      - event_0001
+      - event_0002
+      - event_0003
+      - event_0004
+      properties:
+        event_0001:
+          type: integer
+          example: 10
+        event_0002:
+          type: number
+          format: integer
+          example: 22
+        event_0003:
+          type: number
+          format: integer
+          example: 12
+        event_0004:
+          type: number
+          format: integer
+          example: 98
+      type: object
