@@ -110,12 +110,15 @@ def populate_stats():
     
     # 3. Get the current datetime
     current_datetime = datetime.datetime.now()
-    
-    # 4. Query the two GET endpoints from your Data Store Service (using requests.get) to get all new events from the last datetime you requested them (from your statistics) to the current datetime
-    new_power_usage_events = requests.get(app_config['power-usage']['url'], 
-                                          params={'start_timestamp': stats.date_created.strftime("%Y-%m-%dT%H:%M:%S"), 'end_timestamp': current_datetime.strftime("%Y-%m-%dT%H:%M:%S")})
-    new_location_events = requests.get(app_config['location']['url'], 
-                                       params={'start_timestamp': stats.date_created.strftime("%Y-%m-%dT%H:%M:%S"), 'end_timestamp': current_datetime.strftime("%Y-%m-%dT%H:%M:%S")})
+    logger.info("GET REQUEST TO STORAGE NEXT")
+    try:
+        # 4. Query the two GET endpoints from your Data Store Service (using requests.get) to get all new events from the last datetime you requested them (from your statistics) to the current datetime
+        new_power_usage_events = requests.get(app_config['power-usage']['url'], 
+                                            params={'start_timestamp': stats.date_created.strftime("%Y-%m-%dT%H:%M:%S"), 'end_timestamp': current_datetime.strftime("%Y-%m-%dT%H:%M:%S")})
+        new_location_events = requests.get(app_config['location']['url'], 
+                                        params={'start_timestamp': stats.date_created.strftime("%Y-%m-%dT%H:%M:%S"), 'end_timestamp': current_datetime.strftime("%Y-%m-%dT%H:%M:%S")})
+    except Exception as e:
+        logger.error(f"Unable to GET request from Storage: {e}")
 
     # 4.1. Log an INFO message with the number of events received
     logger.info(f"Received {len(new_power_usage_events.json())} power usage and {len(new_location_events.json())} location events")
