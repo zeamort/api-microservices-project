@@ -55,13 +55,13 @@ Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
 
-def publish_event_to_event_log(client, code, message):
+def publish_event_to_event_log(client, code, message, event_type):
     event_log_topic = client.topics[str.encode(app_config['events']['startup_topic'])]
     event_log_producer = event_log_topic.get_sync_producer()
 
     
     event_msg = {
-        "type": "processor_event",
+        "type": event_type,
         "datetime": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "payload": {
             "code": code,
@@ -128,7 +128,7 @@ def populate_stats():
     
     messages_processed = len(new_power_usage_events.json()) + len(new_location_events.json())
     if messages_processed > app_config['message_threshold']:
-        publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.")
+        publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.", "large_processor_event")
 
     # 5. Based on the new events from the Data Store Service:
     try:
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     else:
         logger.error("Exceeded maximum number of retries (%s) for Kafka connection", app_config['max_retries'])
 
-    publish_event_to_event_log(client, "0003", "Processor successfully started.")
+    publish_event_to_event_log(client, "0003", "Processor successfully started.", "processor_startup")
 
     init_scheduler()
     app.run(host='0.0.0.0', port=8100)
