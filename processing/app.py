@@ -92,8 +92,7 @@ def populate_stats():
     """ Periodically update stats """
     # 1. Log an INFO message indicating periodic processing has started
     logger.info("Start Periodic Processing")
-    # messages_processed = 0
-
+    
     # 2. Read in the current statistics from the SQLite database (filename defined in your configuration)
     try:
         session = DB_SESSION()
@@ -110,7 +109,6 @@ def populate_stats():
     
     # 3. Get the current datetime
     current_datetime = datetime.datetime.now()
-    logger.info("GET REQUEST TO STORAGE NEXT")
     try:
         # 4. Query the two GET endpoints from your Data Store Service (using requests.get) to get all new events from the last datetime you requested them (from your statistics) to the current datetime
         new_power_usage_events = requests.get(app_config['power-usage']['url'], 
@@ -127,13 +125,12 @@ def populate_stats():
     if new_power_usage_events.status_code != 200 or new_location_events.status_code != 200:
         logger.error("Failed to get events from Data Store Service")
         return NoContent, 404
-
-    # messages_processed += len(new_power_usage_events) + len(new_location_events)
-    # if messages_processed > app_config.get('message_processing_threshold', app_config['message_threshold']):
-    #     publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.")
+    
+    messages_processed = len(new_power_usage_events.json()) + len(new_location_events.json())
+    if messages_processed > app_config['message_threshold']:
+        publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.")
 
     # 5. Based on the new events from the Data Store Service:
-    logger.info("Step 5")
     try:
         # 5.1. Calculate your updated statistics
         if len(new_power_usage_events.json()) > 0:
