@@ -133,30 +133,34 @@ def populate_stats():
         publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.")
 
     # 5. Based on the new events from the Data Store Service:
+    logger.info("Step 5")
+    try:
+        # 5.1. Calculate your updated statistics
+        if len(new_power_usage_events.json()) > 0:
+            sum_of_soc_readings = 0
+
+            for event in new_power_usage_events.json():
+                if event['power_data']['power_W'] > stats.max_power_W:
+                    stats.max_power_W = event['power_data']['power_W']
+
+                if event['power_data']['temperature_C'] > stats.max_temperature_C:
+                    stats.max_temperature_C = event['power_data']['temperature_C']
+
+                sum_of_soc_readings += event['power_data']['state_of_charge_%']
+
+                # 5.2. Log a DEBUG message for each event processed that includes the trace_id 
+                logger.debug(f"event with trace_id {event['trace_id']} has been processed.")
+
+            stats.average_state_of_charge = ((stats.average_state_of_charge * stats.total_power_usage_events) + 
+                                            sum_of_soc_readings)/(stats.total_power_usage_events + len(new_power_usage_events.json()))
+            
+            stats.total_power_usage_events += len(new_power_usage_events.json())
+            if len(new_location_events.json()) > 0:
+                stats.total_location_events += len(new_location_events.json())
+    except Exception as e:
+        logger.error(f"Step 5: {e}")
+
     
-    # 5.1. Calculate your updated statistics
-    if len(new_power_usage_events.json()) > 0:
-        sum_of_soc_readings = 0
-
-        for event in new_power_usage_events.json():
-            if event['power_data']['power_W'] > stats.max_power_W:
-                stats.max_power_W = event['power_data']['power_W']
-
-            if event['power_data']['temperature_C'] > stats.max_temperature_C:
-                stats.max_temperature_C = event['power_data']['temperature_C']
-
-            sum_of_soc_readings += event['power_data']['state_of_charge_%']
-
-            # 5.2. Log a DEBUG message for each event processed that includes the trace_id 
-            logger.debug(f"event with trace_id {event['trace_id']} has been processed.")
-
-        stats.average_state_of_charge = ((stats.average_state_of_charge * stats.total_power_usage_events) + 
-                                         sum_of_soc_readings)/(stats.total_power_usage_events + len(new_power_usage_events.json()))
-        
-        stats.total_power_usage_events += len(new_power_usage_events.json())
-
-    if len(new_location_events.json()) > 0:
-        stats.total_location_events += len(new_location_events.json())
 
     # 5.3. Write the updated statistics to the SQLite database file (filename defined in your configuration)
     try:
