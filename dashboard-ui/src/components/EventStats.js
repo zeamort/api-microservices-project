@@ -36,10 +36,10 @@ export default function EventStats() {
             <div>
                 <h1>Event Log Statistics</h1>
                 {/* Directly access and display each event code's stats */}
-                <div>0001 Events Logged: {stats['event_0001']}</div>
-                <div>0002 Events Logged: {stats['event_0002']}</div>
-                <div>0003 Events Logged: {stats['event_0003']}</div>
-                <div>0004 Events Logged: {stats['event_0004']}</div>
+                <div>0001 Events Logged: {stats['0001']}</div>
+                <div>0002 Events Logged: {stats['0002']}</div>
+                <div>0003 Events Logged: {stats['0003']}</div>
+                <div>0004 Events Logged: {stats['0004']}</div>
             </div>
         );
     }
