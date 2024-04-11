@@ -92,7 +92,7 @@ def populate_stats():
     """ Periodically update stats """
     # 1. Log an INFO message indicating periodic processing has started
     logger.info("Start Periodic Processing")
-    messages_processed = 0
+    # messages_processed = 0
 
     # 2. Read in the current statistics from the SQLite database (filename defined in your configuration)
     try:
@@ -128,9 +128,9 @@ def populate_stats():
         logger.error("Failed to get events from Data Store Service")
         return NoContent, 404
 
-    messages_processed += len(new_power_usage_events) + len(new_location_events)
-    if messages_processed > app_config.get('message_processing_threshold', app_config['message_threshold']):
-        publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.")
+    # messages_processed += len(new_power_usage_events) + len(new_location_events)
+    # if messages_processed > app_config.get('message_processing_threshold', app_config['message_threshold']):
+    #     publish_event_to_event_log(client, "0004", f"Processed more than {app_config['message_threshold']} messages.")
 
     # 5. Based on the new events from the Data Store Service:
     logger.info("Step 5")
