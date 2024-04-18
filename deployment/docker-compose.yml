@@ -148,12 +148,28 @@ services:
       - event-logger-db:/data
     depends_on:
       - "kafka"
+  anomaly_detector:
+    image: anomaly_detector
+    restart: always
+    ports:
+      - "8130"
+    networks:
+      - "api.network"
+    environment:
+      - TARGET_ENV=test
+    volumes:
+      - /home/ubuntu/config/anomaly_detector:/config
+      - /home/ubuntu/logs:/logs
+      - anomaly-logger-db:/data
+    depends_on:
+      - "kafka"
 
 # Names our volume
 volumes:
   my-db:
   processing-db:
   event-logger-db:
+  anomaly-logger-db:
 networks:
   api.network:
 
