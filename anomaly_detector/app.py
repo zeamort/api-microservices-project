@@ -51,7 +51,7 @@ Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
 
-def get_anomaly_stats(anomaly_type):
+def get_anomaly_stats():
     session = DB_SESSION()
 
     try:
@@ -60,23 +60,17 @@ def get_anomaly_stats(anomaly_type):
             logger.error("No anomalies found")
             return {"message": "Anomalies do not exist"}, 404
 
-        # Retrieve count for the specific anomaly type
-        count = session.query(
+        # Retrieve counts for each anomaly type
+        stats = session.query(
+            AnomalyStats.anomaly_type,
             func.count(AnomalyStats.anomaly_type).label('count')
-        ).filter(AnomalyStats.anomaly_type == anomaly_type).scalar()
+        ).group_by(AnomalyStats.anomaly_type).all()
 
-        if count == 0:
-            results = {
-                "num_anomalies": 0,
-                "most_recent_desc": latest_row.description,
-                "most_recent_datetime": latest_row.date_created.strftime('%Y-%m-%d %H:%M:%S'),
-            }
+        # Construct a dictionary of anomaly types and their counts
+        anomaly_counts = {anomaly_type: count for anomaly_type, count in stats}
 
-            logger.info("Query for anomaly statistics successful")
-            return results, 200
-        
         results = {
-            "num_anomalies": count,
+            "num_anomalies": anomaly_counts,  # Dictionary of counts for each anomaly type
             "most_recent_desc": latest_row.description,
             "most_recent_datetime": latest_row.date_created.strftime('%Y-%m-%d %H:%M:%S'),
         }
@@ -146,8 +140,7 @@ def process_messages():
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')
-# app.add_api("openapi.yaml", base_path="/anomaly_stats", strict_validation=True, validate_responses=True)
-app.add_api("openapi.yaml", strict_validation=True, validate_responses=True)
+app.add_api("openapi.yaml", base_path="/anomaly_stats", strict_validation=True, validate_responses=True)
 
 app.add_middleware(
     CORSMiddleware,

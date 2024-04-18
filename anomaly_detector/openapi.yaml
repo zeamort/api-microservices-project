@@ -54,8 +54,10 @@ components:
       - most_recent_datetime
       properties:
         num_anomalies:
-          type: integer
-          example: 5
+          type: object
+          additionalProperties:
+            type: integer
+          description: A dictionary with counts of each anomaly type.
         most_recent_desc:
           type: string
           example: Value of 100 is too high
