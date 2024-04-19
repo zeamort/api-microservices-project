@@ -124,14 +124,14 @@ def process_messages():
         logger.info("Payload: %s" % payload)
 
         if msg["type"] == "power_usage":
-            if payload['power_data']['state_of_charge_%'] < app_config["low_soc_threshold"]:
+            if payload['power_data']['state_of_charge_%'] < app_config['low_soc_threshold']:
                 anomaly_type = "Low SoC"
-                anomaly_message = f"SoC of {payload['power_data']['state_of_charge_%']}% is below the set safe threshold of {app_config["low_soc_threshold"]}%"
+                anomaly_message = f"SoC of {payload['power_data']['state_of_charge_%']}% is below the set safe threshold of {app_config['low_soc_threshold']}%"
                 
                 report_anomaly(payload, msg["type"], anomaly_type, anomaly_message)
-            if payload['power_data']['temperature_C'] > app_config["high_temp_threshold"]:
+            if payload['power_data']['temperature_C'] > app_config['high_temp_threshold']:
                 anomaly_type = "High Temp"
-                anomaly_message = f"Temperature of {payload['power_data']['temperature_C']}C is above the set safe threshold of {app_config["high_temp_threshold"]}C"
+                anomaly_message = f"Temperature of {payload['power_data']['temperature_C']}C is above the set safe threshold of {app_config['high_temp_threshold']}C"
                 
                 report_anomaly(payload, msg["type"], anomaly_type, anomaly_message)
             
